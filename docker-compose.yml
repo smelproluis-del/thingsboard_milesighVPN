@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: tb-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: thingsboard
+      POSTGRES_USER: thingsboard
+      POSTGRES_PASSWORD: thingsboard
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tb-network
+
+  thingsboard:
+    image: thingsboard/tb-postgres:latest
+    container_name: thingsboard
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - "8080:9090"   # UI de ThingsBoard
+    environment:
+      TB_QUEUE_TYPE: in-memory
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/thingsboard
+      SPRING_DATASOURCE_USERNAME: thingsboard
+      SPRING_DATASOURCE_PASSWORD: thingsboard
+    volumes:
+      - tb_data:/data
+      - tb_logs:/var/log/thingsboard
+    networks:
+      - tb-network
+
+volumes:
+  postgres_data:
+  tb_data:
+  tb_logs:
+
+networks:
+  tb-network:
+    driver: bridge

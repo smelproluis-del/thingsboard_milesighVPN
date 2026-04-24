@@ -1,54 +1,35 @@
-version: "3.8"
-
 services:
   postgres:
-    image: postgres:16
-    container_name: tb-postgres
     restart: always
+    image: "postgres:16"
+    ports:
+      - "5432"
     environment:
       POSTGRES_DB: thingsboard
-      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    networks:
-      - tb-network
-
   thingsboard-ce:
-    image: thingsboard/tb-node:4.3.1.1
-    container_name: thingsboard
     restart: always
-    depends_on:
-      - postgres
+    image: "thingsboard/tb-node:4.3.1.1"
     ports:
-      - "8080:8080"       # Web UI
-      - "7070:7070"       # Remote shell / edge
-      - "1883:1883"       # MQTT
-      - "8883:8883"       # MQTT TLS
-      - "5683-5688:5683-5688/udp"  # CoAP / LwM2M
-    environment:
-      TB_SERVICE_ID: tb-ce-node
-      TB_QUEUE_TYPE: in-memory
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/thingsboard
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-    volumes:
-      - tb_data:/data
-      - tb_logs:/var/log/thingsboard
-    networks:
-      - tb-network
+      - "8080:8080"
+      - "7070:7070"
+      - "1883:1883"
+      - "8883:8883"
+      - "5683-5688:5683-5688/udp"
     logging:
       driver: "json-file"
       options:
         max-size: "100m"
         max-file: "10"
+    environment:
+      TB_SERVICE_ID: tb-ce-node
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/thingsboard
+    depends_on:
+      - postgres
 
 volumes:
   postgres-data:
     name: tb-postgres-data
-  tb_data:
-  tb_logs:
-
-networks:
-  tb-network:
-    driver: bridge
+    driver: local

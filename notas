@@ -1,0 +1,8 @@
+# 1. Copias el dump al contenedor
+docker cp .\backup_20260305_000002.dump thingsboard_milesighvpn-postgres-1:/tmp/backup_20260305_000002.dump
+
+# 2. Restauras
+docker exec -it thingsboard_milesighvpn-postgres-1 pg_restore -U tb_user -d thingsboard -v /tmp/backup_20260305_000002.dump
+
+
+docker compose up -d postgres pgadmin
